@@ -1,0 +1,24 @@
+global:
+  scrape_interval: 10s # By default, scrape targets every 15 seconds.
+  evaluation_interval: 10s # By default, scrape targets every 15 seconds.
+
+rule_files:
+  - /etc/prometheus/rules/*.rules
+scrape_configs:
+  - job_name: 'telegraf'
+    scrape_interval: 30s
+    scrape_timeout: 30s
+    static_configs:
+      - targets: ['sha256.eu.miningmeter.com:9273']       # Proxy Eu
+      - targets: ['sha256.us.miningmeter.com:9273']       # Proxy Us
+      - targets: ['sha256.sg.miningmeter.com:9273']       # Proxy Sg
+    scheme: https
+    tls_config:
+      ca_file: '/etc/ssl/certs/cloudflare_ca.pem'
+      cert_file: '/etc/ssl/certs/cloudflare.pem'
+      key_file: '/etc/ssl/private/cloudflare.key'
+      server_name: '{{ prometheus_fqdn }}'
+    metric_relabel_configs:
+      - source_labels: [ __name__ ]
+        regex: '^go_.*'
+        action: drop
